@@ -1,4 +1,4 @@
--- MySQL Workbench Forward Engineering
+-- MySQL Script con Modificaciones y Mejoras
 
 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
@@ -7,375 +7,417 @@ SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,N
 -- -----------------------------------------------------
 -- Schema tp1_integrador
 -- -----------------------------------------------------
+DROP SCHEMA IF EXISTS `tp1_integrador`;
+use `tp1_integrador`;
+
+CREATE SCHEMA IF NOT EXISTS `tp1_integrador` DEFAULT CHARACTER SET utf8;
+USE `tp1_integrador`;
 
 -- -----------------------------------------------------
--- Schema tp1_integrador
+-- Tabla Terminal_automotriz
 -- -----------------------------------------------------
-CREATE SCHEMA IF NOT EXISTS `tp1_integrador` DEFAULT CHARACTER SET utf8 ;
-USE `tp1_integrador` ;
-
--- -----------------------------------------------------
--- Table `tp1_integrador`.`Terminal_automotriz`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tp1_integrador`.`Terminal_automotriz` (
-  `id_terminal` INT NOT NULL,
+CREATE TABLE IF NOT EXISTS `Terminal_automotriz` (
+  `id_terminal` INT NOT NULL AUTO_INCREMENT,
   `nombre` VARCHAR(45) NOT NULL,
-  `fecha_de_entrega` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`id_terminal`))
-ENGINE = InnoDB;
-
+  PRIMARY KEY (`id_terminal`)
+) ENGINE=InnoDB;
 
 -- -----------------------------------------------------
--- Table `tp1_integrador`.`Proveedores`
+-- Tabla Proveedores
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tp1_integrador`.`Proveedores` (
-  `id_proveedor` INT NOT NULL,
+CREATE TABLE IF NOT EXISTS `Proveedores` (
+  `id_proveedor` INT NOT NULL AUTO_INCREMENT,
   `nombre` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`id_proveedor`))
-ENGINE = InnoDB;
-
+  PRIMARY KEY (`id_proveedor`)
+) ENGINE=InnoDB;
 
 -- -----------------------------------------------------
--- Table `tp1_integrador`.`Modelo`
+-- Tabla Modelo
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tp1_integrador`.`Modelo` (
-  `id_modelo` INT NOT NULL,
+CREATE TABLE IF NOT EXISTS `Modelo` (
+  `id_modelo` INT NOT NULL AUTO_INCREMENT,
   `nombre` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`id_modelo`))
-ENGINE = InnoDB;
-
+  PRIMARY KEY (`id_modelo`)
+) ENGINE=InnoDB;
 
 -- -----------------------------------------------------
--- Table `tp1_integrador`.`Concesionaria`
+-- Tabla Concesionaria
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tp1_integrador`.`Concesionaria` (
-  `id_concesionaria` INT NOT NULL,
+CREATE TABLE IF NOT EXISTS `Concesionaria` (
+  `id_concesionaria` INT NOT NULL AUTO_INCREMENT,
   `nombre` VARCHAR(45) NOT NULL,
-  `terminal_automotriz_Id_terminal` INT NOT NULL,
+  `terminal_automotriz_id_terminal` INT NOT NULL,
   `direccion` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`id_concesionaria`),
-  INDEX `fk_concesionaria_Terminal Automotriz1_idx` (`terminal_automotriz_Id_terminal` ASC) VISIBLE,
-  CONSTRAINT `fk_concesionaria_Terminal Automotriz1`
-    FOREIGN KEY (`terminal_automotriz_Id_terminal`)
-    REFERENCES `tp1_integrador`.`Terminal_automotriz` (`id_terminal`)
+  INDEX `fk_concesionaria_terminal_automotriz_idx` (`terminal_automotriz_id_terminal` ASC),
+  CONSTRAINT `fk_concesionaria_terminal_automotriz`
+    FOREIGN KEY (`terminal_automotriz_id_terminal`)
+    REFERENCES `Terminal_automotriz` (`id_terminal`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
+    ON UPDATE NO ACTION
+) ENGINE=InnoDB;
 
 -- -----------------------------------------------------
--- Table `tp1_integrador`.`ventas_realizadas`
+-- Tabla Ventas_Realizadas
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tp1_integrador`.`ventas_realizadas` (
-  `id_ventas_realizadas` INT NOT NULL,
+CREATE TABLE IF NOT EXISTS `Ventas_Realizadas` (
+  `id_venta` INT NOT NULL AUTO_INCREMENT,
   `concesionaria_id_concesionaria` INT NOT NULL,
-  `cantidad` INT NOT NULL,
-  PRIMARY KEY (`id_ventas_realizadas`),
-  INDEX `fk_ventas realizadas_concesionaria1_idx` (`concesionaria_id_concesionaria` ASC) VISIBLE,
-  CONSTRAINT `fk_ventas realizadas_concesionaria1`
+  `fecha_venta` DATE NOT NULL,
+  PRIMARY KEY (`id_venta`),
+  INDEX `fk_ventas_realizadas_concesionaria_idx` (`concesionaria_id_concesionaria` ASC),
+  CONSTRAINT `fk_ventas_realizadas_concesionaria`
     FOREIGN KEY (`concesionaria_id_concesionaria`)
-    REFERENCES `tp1_integrador`.`Concesionaria` (`id_concesionaria`)
+    REFERENCES `Concesionaria` (`id_concesionaria`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
+    ON UPDATE NO ACTION
+) ENGINE=InnoDB;
 
 -- -----------------------------------------------------
--- Table `tp1_integrador`.`Ventas_realizadas_has_Modelo`
+-- Tabla Ventas_Detalle
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tp1_integrador`.`Ventas_realizadas_has_Modelo` (
-  `ventas _realizadas_id` INT NOT NULL,
+CREATE TABLE IF NOT EXISTS `Ventas_Detalle` (
+  `id_venta` INT NOT NULL,
   `modelo_id_modelo` INT NOT NULL,
-  PRIMARY KEY (`ventas _realizadas_id`, `modelo_id_modelo`),
-  INDEX `fk_ventas realizadas_has_Modelo_Modelo1_idx` (`modelo_id_modelo` ASC) VISIBLE,
-  INDEX `fk_ventas realizadas_has_Modelo_ventas realizadas1_idx` (`ventas _realizadas_id` ASC) VISIBLE,
-  CONSTRAINT `fk_ventas realizadas_has_Modelo_ventas realizadas1`
-    FOREIGN KEY (`ventas _realizadas_id`)
-    REFERENCES `tp1_integrador`.`ventas_realizadas` (`id_ventas_realizadas`)
+  `cantidad` INT NOT NULL,
+  PRIMARY KEY (`id_venta`, `modelo_id_modelo`),
+  INDEX `fk_ventas_detalle_modelo_idx` (`modelo_id_modelo` ASC),
+  CONSTRAINT `fk_ventas_detalle_venta`
+    FOREIGN KEY (`id_venta`)
+    REFERENCES `Ventas_Realizadas` (`id_venta`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_ventas realizadas_has_Modelo_Modelo1`
+  CONSTRAINT `fk_ventas_detalle_modelo`
     FOREIGN KEY (`modelo_id_modelo`)
-    REFERENCES `tp1_integrador`.`Modelo` (`id_modelo`)
+    REFERENCES `Modelo` (`id_modelo`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
+    ON UPDATE NO ACTION
+) ENGINE=InnoDB;
 
 -- -----------------------------------------------------
--- Table `tp1_integrador`.`Vehiculo`
+-- Tabla Vehiculo
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tp1_integrador`.`Vehiculo` (
+CREATE TABLE IF NOT EXISTS `Vehiculo` (
   `patente` VARCHAR(10) NOT NULL,
-  `color` VARCHAR(45) NOT NULL,
-  `ventas realizadas_has_modelo_ventas realizadas_id` INT NOT NULL,
-  `ventas realizadas_has_modelo_modelo_id_modelo` INT NOT NULL,
+  `modelo_id_modelo` INT NOT NULL,
+  `linea_de_montaje_id_linea` INT NOT NULL,
   `fecha_inicio` DATETIME NOT NULL,
   `fecha_fin` DATETIME NULL,
-  PRIMARY KEY (`patente`, `ventas realizadas_has_modelo_ventas realizadas_id`, `ventas realizadas_has_modelo_modelo_id_modelo`),
-  INDEX `fk_Vehiculo_ventas realizadas_has_Modelo1_idx` (`ventas realizadas_has_modelo_ventas realizadas_id` ASC, `ventas realizadas_has_modelo_modelo_id_modelo` ASC) VISIBLE,
-  CONSTRAINT `fk_Vehiculo_ventas realizadas_has_Modelo1`
-    FOREIGN KEY (`ventas realizadas_has_modelo_ventas realizadas_id` , `ventas realizadas_has_modelo_modelo_id_modelo`)
-    REFERENCES `tp1_integrador`.`Ventas_realizadas_has_Modelo` (`ventas _realizadas_id` , `modelo_id_modelo`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `tp1_integrador`.`Linea_de_montaje`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tp1_integrador`.`Linea_de_montaje` (
-  `id_linea_de_montaje` INT NOT NULL,
-  `modelo_id_modelo` INT NOT NULL,
-  `Terminal_automotriz_Id_terminal` INT NOT NULL,
-  `capacidad_productiva` INT NULL,
-  `vehiculo_patente` VARCHAR(10) NOT NULL,
-  PRIMARY KEY (`id_linea_de_montaje`),
-  INDEX `fk_Linea de Montaje_Modelo_idx` (`modelo_id_modelo` ASC) VISIBLE,
-  INDEX `fk_Linea de Montaje_Terminal Automotriz1_idx` (`Terminal_automotriz_Id_terminal` ASC) VISIBLE,
-  INDEX `fk_Linea de Montaje_Vehiculo1_idx` (`vehiculo_patente` ASC) VISIBLE,
-  CONSTRAINT `fk_Linea de Montaje_Modelo`
+  PRIMARY KEY (`patente`),
+  INDEX `fk_vehiculo_modelo_idx` (`modelo_id_modelo` ASC),
+  INDEX `fk_vehiculo_linea_de_montaje_idx` (`linea_de_montaje_id_linea` ASC),
+  CONSTRAINT `fk_vehiculo_modelo`
     FOREIGN KEY (`modelo_id_modelo`)
-    REFERENCES `tp1_integrador`.`Modelo` (`id_modelo`)
+    REFERENCES `Modelo` (`id_modelo`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_Linea de Montaje_Terminal Automotriz1`
-    FOREIGN KEY (`Terminal_automotriz_Id_terminal`)
-    REFERENCES `tp1_integrador`.`Terminal_automotriz` (`id_terminal`)
+  CONSTRAINT `fk_vehiculo_linea_de_montaje`
+    FOREIGN KEY (`linea_de_montaje_id_linea`)
+    REFERENCES `Linea_de_Montaje` (`id_linea`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+) ENGINE=InnoDB;
+
+-- -----------------------------------------------------
+-- Tabla Linea_de_Montaje
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Linea_de_Montaje` (
+  `id_linea` INT NOT NULL AUTO_INCREMENT,
+  `modelo_id_modelo` INT NOT NULL,
+  `terminal_automotriz_id_terminal` INT NOT NULL,
+  `capacidad_productiva` INT NOT NULL,
+  PRIMARY KEY (`id_linea`),
+  INDEX `fk_linea_de_montaje_modelo_idx` (`modelo_id_modelo` ASC),
+  INDEX `fk_linea_de_montaje_terminal_automotriz_idx` (`terminal_automotriz_id_terminal` ASC),
+  CONSTRAINT `fk_linea_de_montaje_modelo`
+    FOREIGN KEY (`modelo_id_modelo`)
+    REFERENCES `Modelo` (`id_modelo`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_Linea de Montaje_Vehiculo1`
-    FOREIGN KEY (`vehiculo_patente`)
-    REFERENCES `tp1_integrador`.`Vehiculo` (`patente`)
+  CONSTRAINT `fk_linea_de_montaje_terminal_automotriz`
+    FOREIGN KEY (`terminal_automotriz_id_terminal`)
+    REFERENCES `Terminal_automotriz` (`id_terminal`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
+    ON UPDATE NO ACTION
+) ENGINE=InnoDB;
 
 -- -----------------------------------------------------
--- Table `tp1_integrador`.`Estacion_de_trabajo`
+-- Tabla Estacion_de_Trabajo
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tp1_integrador`.`Estacion_de_trabajo` (
+CREATE TABLE IF NOT EXISTS `Estacion_de_Trabajo` (
+  `id_estacion` INT NOT NULL AUTO_INCREMENT,
   `tarea` VARCHAR(45) NOT NULL,
-  `linea_de_montaje_id_linea_de_montaje` INT NOT NULL,
+  `linea_de_montaje_id_linea` INT NOT NULL,
   `orden` INT NOT NULL,
-  INDEX `fk_Estacion de trabajo_Linea de Montaje1_idx` (`linea_de_montaje_id_linea_de_montaje` ASC) VISIBLE,
-  PRIMARY KEY (`tarea`),
-  CONSTRAINT `fk_Estacion de trabajo_Linea de Montaje1`
-    FOREIGN KEY (`linea_de_montaje_id_linea_de_montaje`)
-    REFERENCES `tp1_integrador`.`Linea_de_montaje` (`id_linea_de_montaje`)
+  PRIMARY KEY (`id_estacion`),
+  INDEX `fk_estacion_de_trabajo_linea_de_montaje_idx` (`linea_de_montaje_id_linea` ASC),
+  CONSTRAINT `fk_estacion_de_trabajo_linea_de_montaje`
+    FOREIGN KEY (`linea_de_montaje_id_linea`)
+    REFERENCES `Linea_de_Montaje` (`id_linea`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `tp1_integrador`.`Insumos`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tp1_integrador`.`Insumos` (
-  `codigo` INT NOT NULL,
-  `descripcion` VARCHAR(45) NOT NULL,
-  `precio` FLOAT NOT NULL,
-  `nombre` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`codigo`))
-ENGINE = InnoDB;
-
+    ON UPDATE NO ACTION
+) ENGINE=InnoDB;
 
 -- -----------------------------------------------------
--- Table `tp1_integrador`.`Pedido`
+-- Tabla Vehiculo_en_Estacion
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tp1_integrador`.`Pedido` (
-  `boleta_num` INT NOT NULL,
-  `terminal_automotriz_Id_terminal` INT NOT NULL,
-  `proveedores_Id_proveedor` INT NOT NULL,
-  `cabecera` VARCHAR(35) NOT NULL,
-  `detalle` VARCHAR(200) NOT NULL,
-  
-  PRIMARY KEY (`boleta_num`, `terminal_automotriz_Id_terminal`),
-  INDEX `fk_Pedido_Terminal Automotriz1_idx` (`terminal_automotriz_Id_terminal` ASC) VISIBLE,
-  INDEX `fk_Pedido_Proveedores1_idx` (`proveedores_Id_proveedor` ASC) VISIBLE,
-  CONSTRAINT `fk_Pedido_Terminal Automotriz1`
-    FOREIGN KEY (`terminal_automotriz_Id_terminal`)
-    REFERENCES `tp1_integrador`.`Terminal_automotriz` (`id_terminal`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_Pedido_Proveedores1`
-    FOREIGN KEY (`proveedores_Id_proveedor`)
-    REFERENCES `tp1_integrador`.`Proveedores` (`id_proveedor`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
--- -----------------------------------------------------
--- Table `tp1_integrador`.`Vehiculo_en_estacion_de_trabajo`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tp1_integrador`.`Vehiculo_en_estacion_de_trabajo` (
-  `estacion_de_trabajo_tarea` VARCHAR(45) NOT NULL,
+CREATE TABLE IF NOT EXISTS `Vehiculo_en_Estacion` (
+  `id_vehiculo_estacion` INT NOT NULL AUTO_INCREMENT,
   `vehiculo_patente` VARCHAR(10) NOT NULL,
+  `estacion_id_estacion` INT NOT NULL,
   `fecha_ingreso` DATETIME NOT NULL,
   `fecha_egreso` DATETIME NULL,
-  PRIMARY KEY (`estacion_de_trabajo_tarea`, `vehiculo_patente`),
-  INDEX `fk_Estacion de trabajo_has_Vehiculo_Vehiculo1_idx` (`vehiculo_patente` ASC) VISIBLE,
-  INDEX `fk_Estacion de trabajo_has_Vehiculo_Estacion de trabajo1_idx` (`estacion_de_trabajo_tarea` ASC) VISIBLE,
-  CONSTRAINT `fk_Estacion de trabajo_has_Vehiculo_Estacion de trabajo1`
-    FOREIGN KEY (`estacion_de_trabajo_tarea`)
-    REFERENCES `tp1_integrador`.`Estacion_de_trabajo` (`tarea`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_Estacion de trabajo_has_Vehiculo_Vehiculo1`
+  PRIMARY KEY (`id_vehiculo_estacion`),
+  INDEX `fk_vehiculo_en_estacion_vehiculo_idx` (`vehiculo_patente` ASC),
+  INDEX `fk_vehiculo_en_estacion_estacion_idx` (`estacion_id_estacion` ASC),
+  CONSTRAINT `fk_vehiculo_en_estacion_vehiculo`
     FOREIGN KEY (`vehiculo_patente`)
-    REFERENCES `tp1_integrador`.`Vehiculo` (`patente`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `tp1_integrador`.`Proveedores_has_Insumos`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tp1_integrador`.`Proveedores_has_Insumos` (
-  `proveedores_Id_proveedor` INT NOT NULL,
-  `insumos_codigo` INT NOT NULL,
-  PRIMARY KEY (`insumos_codigo`, `proveedores_Id_proveedor`),
-  INDEX `fk_Proveedores_has_Insumos_Insumos1_idx` (`insumos_codigo` ASC) VISIBLE,
-  INDEX `fk_Proveedores_has_Insumos_Proveedores1_idx` (`proveedores_Id_proveedor` ASC) VISIBLE,
-  CONSTRAINT `fk_Proveedores_has_Insumos_Proveedores1`
-    FOREIGN KEY (`proveedores_Id_proveedor`)
-    REFERENCES `tp1_integrador`.`Proveedores` (`id_proveedor`)
+    REFERENCES `Vehiculo` (`patente`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_Proveedores_has_Insumos_Insumos1`
-    FOREIGN KEY (`insumos_codigo`)
-    REFERENCES `tp1_integrador`.`Insumos` (`codigo`)
+  CONSTRAINT `fk_vehiculo_en_estacion_estacion`
+    FOREIGN KEY (`estacion_id_estacion`)
+    REFERENCES `Estacion_de_Trabajo` (`id_estacion`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
+    ON UPDATE NO ACTION
+) ENGINE=InnoDB;
 
 -- -----------------------------------------------------
--- Table `tp1_integrador`.`Insumos_has_Estacion_de_trabajo`
+-- Tabla Insumos
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tp1_integrador`.`Insumos_has_Estacion_de_trabajo` (
-  `Insumos_codigo` INT NOT NULL,
-  `Estacion_de_trabajo_tarea` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`Insumos_codigo`, `Estacion_de_trabajo_tarea`),
-  INDEX `fk_Insumos_has_Estacion_de_trabajo_Estacion_de_trabajo1_idx` (`Estacion_de_trabajo_tarea` ASC) VISIBLE,
-  INDEX `fk_Insumos_has_Estacion_de_trabajo_Insumos1_idx` (`Insumos_codigo` ASC) VISIBLE,
-  CONSTRAINT `fk_Insumos_has_Estacion_de_trabajo_Insumos1`
-    FOREIGN KEY (`Insumos_codigo`)
-    REFERENCES `tp1_integrador`.`Insumos` (`codigo`)
+CREATE TABLE IF NOT EXISTS `Insumos` (
+  `codigo` INT NOT NULL,
+  `descripcion` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`codigo`)
+) ENGINE=InnoDB;
+
+-- -----------------------------------------------------
+-- Tabla Proveedores_has_Insumos
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Proveedores_has_Insumos` (
+  `proveedor_id` INT NOT NULL,
+  `insumo_codigo` INT NOT NULL,
+  `precio` FLOAT NOT NULL,
+  PRIMARY KEY (`proveedor_id`, `insumo_codigo`),
+  INDEX `fk_proveedores_insumos_insumo_idx` (`insumo_codigo` ASC),
+  INDEX `fk_proveedores_insumos_proveedor_idx` (`proveedor_id` ASC),
+  CONSTRAINT `fk_proveedores_insumos_proveedor`
+    FOREIGN KEY (`proveedor_id`)
+    REFERENCES `Proveedores` (`id_proveedor`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_Insumos_has_Estacion_de_trabajo_Estacion_de_trabajo1`
-    FOREIGN KEY (`Estacion_de_trabajo_tarea`)
-    REFERENCES `tp1_integrador`.`Estacion_de_trabajo` (`tarea`)
+  CONSTRAINT `fk_proveedores_insumos_insumo`
+    FOREIGN KEY (`insumo_codigo`)
+    REFERENCES `Insumos` (`codigo`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
+    ON UPDATE NO ACTION
+) ENGINE=InnoDB;
+
+-- -----------------------------------------------------
+-- Tabla Insumos_por_Estacion
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Insumos_por_Estacion` (
+  `insumo_codigo` INT NOT NULL,
+  `estacion_id_estacion` INT NOT NULL,
+  `cantidad` INT NOT NULL,
+  PRIMARY KEY (`insumo_codigo`, `estacion_id_estacion`),
+  INDEX `fk_insumos_estacion_insumo_idx` (`insumo_codigo` ASC),
+  INDEX `fk_insumos_estacion_estacion_idx` (`estacion_id_estacion` ASC),
+  CONSTRAINT `fk_insumos_estacion_insumo`
+    FOREIGN KEY (`insumo_codigo`)
+    REFERENCES `Insumos` (`codigo`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_insumos_estacion_estacion`
+    FOREIGN KEY (`estacion_id_estacion`)
+    REFERENCES `Estacion_de_Trabajo` (`id_estacion`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+) ENGINE=InnoDB;
+
+-- -----------------------------------------------------
+-- Tabla Pedido
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Pedido` (
+  `id_pedido` INT NOT NULL AUTO_INCREMENT,
+  `terminal_automotriz_id_terminal` INT NOT NULL,
+  `proveedor_id` INT NOT NULL,
+  `fecha_pedido` DATE NOT NULL,
+  PRIMARY KEY (`id_pedido`),
+  INDEX `fk_pedido_terminal_automotriz_idx` (`terminal_automotriz_id_terminal` ASC),
+  INDEX `fk_pedido_proveedor_idx` (`proveedor_id` ASC),
+  CONSTRAINT `fk_pedido_terminal_automotriz`
+    FOREIGN KEY (`terminal_automotriz_id_terminal`)
+    REFERENCES `Terminal_automotriz` (`id_terminal`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_pedido_proveedor`
+    FOREIGN KEY (`proveedor_id`)
+    REFERENCES `Proveedores` (`id_proveedor`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+) ENGINE=InnoDB;
+
+-- -----------------------------------------------------
+-- Tabla Pedido_Detalle
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Pedido_Detalle` (
+  `id_pedido` INT NOT NULL,
+  `insumo_codigo` INT NOT NULL,
+  `cantidad` INT NOT NULL,
+  PRIMARY KEY (`id_pedido`, `insumo_codigo`),
+  INDEX `fk_pedido_detalle_insumo_idx` (`insumo_codigo` ASC),
+  CONSTRAINT `fk_pedido_detalle_pedido`
+    FOREIGN KEY (`id_pedido`)
+    REFERENCES `Pedido` (`id_pedido`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_pedido_detalle_insumo`
+    FOREIGN KEY (`insumo_codigo`)
+    REFERENCES `Insumos` (`codigo`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+) ENGINE=InnoDB;
+
+-- -----------------------------------------------------
+-- Tabla Fecha_Entrega
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Fecha_Entrega` (
+  `id_venta` INT NOT NULL,
+  `fecha_entrega` DATE NOT NULL,
+  PRIMARY KEY (`id_venta`),
+  CONSTRAINT `fk_fecha_entrega_venta`
+    FOREIGN KEY (`id_venta`)
+    REFERENCES `Ventas_Realizadas` (`id_venta`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+) ENGINE=InnoDB;
+
+
+
+-- Ejemplo: Alta de Concesionario, Paso 1: Asegurar que existe una Terminal Automotriz
+INSERT INTO Terminal_automotriz (nombre)
+VALUES ('Terminal Central');
+
+-- Declarar variables para capturar los parámetros de salida
+SET @nResultado = 0;
+SET @cMensaje = '';
+
+-- Invocar el procedimiento con datos de ejemplo
+CALL sp_alta_concesionario(
+    'Concesionario Los Robles', -- p_nombre
+    1,                          -- p_terminal_id (id de la terminal automotriz)
+    'Av. Siempre Viva 742',     -- p_direccion
+    @nResultado,
+    @cMensaje
+);
+
+-- Visualizar los resultados
+SELECT @nResultado AS nResultado, @cMensaje AS cMensaje;
+
+
+
+-- Ejemplo: Alta de Pedidos, Paso 1: Asegurar que existe una Terminal Automotriz
+						--   Paso 2: Asegurar que exista un proveedor
+INSERT INTO Proveedores (nombre)
+VALUES ('Proveedor ABC');
+
+-- Paso 3: Asegurar que existan insumos
+INSERT INTO Insumos (codigo, descripcion)
+VALUES (1001, 'Motor V8'), (1002, 'Llantas de aleación');
+
+-- Verificar los insumos
+SELECT * FROM Insumos;
+-- ASEGURARSE QUE EL CODIGO EXISTE
+SET @insumos_json = '[
+    {"codigo": 1001, "cantidad": 5},
+    {"codigo": 1002, "cantidad": 20}
+]';
+
+-- Invocar el procedimiento con datos de ejemplo
+CALL sp_alta_pedido(
+    1,                -- p_terminal_id (id de la terminal automotriz)
+    1,                -- p_proveedor_id (id del proveedor)
+    CURDATE(),        -- p_fecha_pedido
+    @insumos_json,    -- p_insumos (JSON con los detalles)
+    @nResultado,
+    @cMensaje
+);
+
+-- Visualizar los resultados
+SELECT @nResultado AS nResultado, @cMensaje AS cMensaje;
+
+
+
+
+-- Invocar el procedimiento ALTA DE PROVEEDOR con datos de ejemplo
+CALL sp_alta_proveedor(
+    'Proveedor XYZ',  -- p_nombre
+    @nResultado,
+    @cMensaje
+);
+
+-- Visualizar los resultados
+SELECT @nResultado AS nResultado, @cMensaje AS cMensaje;
+
+
+
+-- Invocar el procedimiento ALTA DE INSUMOS con datos de ejemplo
+CALL sp_alta_insumo(
+    2001,               -- p_codigo
+    'Neumático 17"',    -- p_descripcion
+    @nResultado,
+    @cMensaje
+);
+
+-- Visualizar los resultados
+SELECT @nResultado AS nResultado, @cMensaje AS cMensaje;
+
+
+
+-- TAREA NUMERO 3 DEL TRABAJO INTEGRADOR --
+-- PUNTO 1:
+-- Invocar el procedimiento
+
+INSERT INTO Modelo (nombre) VALUES ('Modelo A'), ('Modelo B');
+SELECT * FROM Modelo;
+-- Supongamos que 'Modelo A' tiene id_modelo = 1, 'Modelo B' tiene id_modelo = 2
+
+INSERT INTO Linea_de_Montaje (modelo_id_modelo, terminal_automotriz_id_terminal, capacidad_productiva)
+VALUES (1, 1, 100), (2, 1, 80);
+
+-- Crear una venta
+INSERT INTO Ventas_Realizadas (concesionaria_id_concesionaria, fecha_venta)
+VALUES (2, CURDATE());
+SET @id_venta = LAST_INSERT_ID();
+
+-- Agregar detalles de la venta
+INSERT INTO Ventas_Detalle (id_venta, modelo_id_modelo, cantidad)
+VALUES (@id_venta, 1, 2), (@id_venta, 2, 3);
+
+
+CALL sp_generar_vehiculos_pedido(
+    3,              -- p_id_venta (reemplaza con el ID de venta correspondiente)
+    @nResultado,
+    @cMensaje
+);
+
+-- Visualizar los resultados
+SELECT @nResultado AS nResultado, @cMensaje AS cMensaje;
+SELECT * FROM Vehiculo;
+
+
+
+
+
+
+
+
+
+
+
 
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
-
-use tp1_integrador;
-
--- --- terminal_automotriz ---
-
-insert into terminal_automotriz (id_terminal,nombre,fecha_de_entrega) values (1, "terminal_1", '2024-10-27 18:30:00');
-
-select * from terminal_automotriz;
-
--- ---------------------------------------------------------
-
--- --- ALTA CONCESIONARIA ---
-
-CALL altaConcesionaria(10, 'AutoMovil S.A', 1, 'Av. Siempre Viva 123, Ciudad A',@nResultado1, @cMensaje1);
-select @nResultado1, @cMensaje1;
-CALL altaConcesionaria(11, 'Carros del Norte', 1, 'Calle Central 45, Ciudad B',@nResultado1, @cMensaje1);
-select @nResultado1, @cMensaje1;
-
--- --- MODIFICACION CONCESIONARIA ---
-
-CALL modificacionConcesionaria(10, 'AutoMovil SA', 1, 'Av. Siempre Viva 123, Ciudad A',@nResultado1, @cMensaje1);
-select @nResultado1, @cMensaje1;
-CALL modificacionConcesionaria(11, 'Carros del sur', 1, 'Calle Central 45, Ciudad B',@nResultado1, @cMensaje1);
-select @nResultado1, @cMensaje1;
-
--- --- ALTA CONCESIONARIA ---
-
-call bajaConcesionariaPorID(10,@nResultado1, @cMensaje1);
-select @nResultado1, @cMensaje1;
-call bajaConcesionariaPorID(500,@nResultado1, @cMensaje1);
-select @nResultado1, @cMensaje1;
-
-select * from concesionaria;
-
--- ----------------------------------------------------------------------
-
---  --- ALTA PROVEEDORES ---
-
-call altaProveedor(1, 'Proveedor Norte',@nResultado1, @cMensaje1);
-select @nResultado1, @cMensaje1;
-call altaProveedor(2, 'Suministros Globales',@nResultado1, @cMensaje1);
-select @nResultado1, @cMensaje1;
-
--- --- MODIFICACION PROVEEDORES ---
-
-call modificacionProveedor(1, 'Proveedor Sur',@nResultado1, @cMensaje1);
-select @nResultado1, @cMensaje1;
-call modificacionProveedor(222222, 'Suministros aGlobales',@nResultado1, @cMensaje1);
-select @nResultado1, @cMensaje1;
-
--- --- BAJA PROVEEDORES ---
-
-call bajaProveedorPorID(1, @nResultado1, @cMensaje1);
-select @nResultado1, @cMensaje1;
-
-select * from proveedores;
-
--- ----------------------------------------------------------------------
-
--- --- ALTA PEDIDO ---
-
-call altaPedido(1,1,4,"pintura","roja",@nResultado1, @cMensaje1);
-select @nResultado1, @cMensaje1;
-call altaPedido(2,1,5,"llantas","cromadas",@nResultado1, @cMensaje1);
-select @nResultado1, @cMensaje1;
-
--- --- MODIFICACION PEDIDO ---
-
-call modificacionPedido(1,1,4,"rueda","verde",@nResultado1, @cMensaje1);
-select @nResultado1, @cMensaje1;
-
--- --- BAJA PEDIDO ---
-
-call bajaPedidoPorNumDeBoleta(1,@nResultado1, @cMensaje1);
-select @nResultado1, @cMensaje1;
-
-select * from pedido;
-
--- ----------------------------------------------------------------------
-
--- --- ALTA INSUMOS ---
-
-call altaInsumos(1,'delantera derecha',25.05,'puerta',@nResultado1, @cMensaje1);
-select @nResultado1, @cMensaje1;
-call altaInsumos(2,'1.8 Troja',25.05,'motor',@nResultado1, @cMensaje1);
-select @nResultado1, @cMensaje1;
-
--- --- MODIFICACION INSUMOS ---
-call modificacionInsumo(1,'delantera izq',15.05,'puerta',@nResultado1, @cMensaje1);
-select @nResultado1, @cMensaje1;
-
--- --- BAJA INSUMOS ---
-
-call bajaInsumoPorID(1,@nResultado1, @cMensaje1);
-select @nResultado1, @cMensaje1;
-
-select * from insumos;
-
--- ----------------------------------------------------------------------
-
-
